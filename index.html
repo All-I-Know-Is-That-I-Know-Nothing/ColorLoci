@@ -108,7 +108,9 @@ footer{padding:60px 0;color:var(--ink-faint);font-size:13px}
 .leaflet-popup-content h4{font-family:var(--serif);font-weight:400;font-size:18px;margin-bottom:2px}
 .leaflet-popup-content .pdate{color:#9a978f;font-size:12px;margin-bottom:10px}
 .leaflet-popup-content .plabel{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#9a978f;margin:10px 0 5px}
-.leaflet-popup-content img.pimg{width:100%;height:auto;display:block;border:1px solid #26251f;background:#121210;min-height:40px}
+.leaflet-popup-content img.pimg{width:100%;height:auto;display:block;border:1px solid #26251f;background:#121210;min-height:40px;-webkit-user-select:none;user-select:none;-webkit-user-drag:none;pointer-events:none}
+.pimg-wrap{position:relative}
+.pimg-wrap::after{content:"";position:absolute;inset:0}
 .leaflet-popup-content .pbar{display:flex;height:16px;border:1px solid #26251f}
 .leaflet-popup-content .pbar span{display:block}
 .leaflet-popup-content .pmeta{color:#9a978f;font-size:12px;margin-top:8px}
@@ -282,7 +284,6 @@ if(CONFIGURED && window.supabase){
   const b=document.getElementById("config-banner");
   b.classList.remove("hidden");
   if(CONFIGURED && !window.supabase){
-    // Keys are present but the supabase-js library never loaded (CDN blocked/failed).
     b.innerHTML="<strong>Library didn't load.</strong> Your Supabase keys are set, but the supabase-js script failed to load, "+
       "so the database can't be reached. Check the <code>&lt;script&gt;</code> CDN tag in the page head and your network connection, then reload.";
   }else{
@@ -584,9 +585,10 @@ submitBtn.addEventListener("click",async()=>{
     return;
   }
   try{
-    const base=`${safeName(publicRow.country)}_${safeName(place)}_${yymmdd(now)}_${tod}`;
+    // Privacy: store files under the opaque link_id only. No country/place/date/time
+    // in the storage path — that metadata lives solely in the submissions row (RLS-guarded).
     const uniq=linkId.slice(0,6);
-    const seName=`${base}_${uniq}_skyearth.png`, pctName=`${base}_${uniq}_percentages.png`;
+    const seName=`${linkId}/${uniq}_skyearth.png`, pctName=`${linkId}/${uniq}_percentages.png`;
     ss.textContent="Uploading palettes…";
     const up1=await supa.storage.from(STORAGE_BUCKET).upload(seName,state.generated.seBlob,{contentType:"image/png",upsert:false});
     if(up1.error)throw up1.error;
@@ -624,8 +626,8 @@ function popupHTML(d){
   const tod=d.time_of_day?` · ${d.time_of_day}`:"";
   let imgs;
   if(d.skyearth_url||d.percentages_url){
-    imgs=`<div class="plabel">Sky / Earth</div><img class="pimg" loading="lazy" src="${d.skyearth_url||""}" alt="sky/earth palette">
-          <div class="plabel">Six-bin breakdown</div><img class="pimg" loading="lazy" src="${d.percentages_url||""}" alt="six-bin palette">`;
+    imgs=`<div class="plabel">Sky / Earth</div><div class="pimg-wrap" oncontextmenu="return false"><img class="pimg" loading="lazy" src="${d.skyearth_url||""}" alt="sky/earth palette"></div>
+          <div class="plabel">Six-bin breakdown</div><div class="pimg-wrap" oncontextmenu="return false"><img class="pimg" loading="lazy" src="${d.percentages_url||""}" alt="six-bin palette"></div>`;
   }else{
     imgs=`<div class="plabel">Six-bin breakdown</div><div class="pbar" style="height:28px">${stripSpans(bins)}</div>`;
   }
