@@ -108,9 +108,9 @@ footer{padding:60px 0;color:var(--ink-faint);font-size:13px}
 .leaflet-popup-content h4{font-family:var(--serif);font-weight:400;font-size:17px;margin-bottom:2px}
 .leaflet-popup-content .pdate{color:#6b6860;font-size:12px;margin-bottom:9px}
 .leaflet-popup-content .plabel{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#6b6860;margin:9px 0 4px}
-.leaflet-popup-content img.pimg{width:100%;height:auto;display:block;border:1px solid #d8d4ca;background:#efece4;min-height:36px;cursor:zoom-in;-webkit-user-select:none;user-select:none;-webkit-user-drag:none}
+.leaflet-popup-content img.pimg{width:100%;height:auto;display:block;border:1px solid #d8d4ca;background:#efece4;min-height:36px;-webkit-user-select:none;user-select:none;-webkit-user-drag:none;pointer-events:none}
 .pimg-wrap{position:relative}
-.pimg-wrap::after{content:"⤢";position:absolute;top:4px;right:4px;width:18px;height:18px;line-height:18px;text-align:center;font-size:12px;color:#fff;background:rgba(0,0,0,.45);pointer-events:none}
+.pimg-wrap::after{content:"";position:absolute;inset:0}
 .leaflet-popup-content .pbar{display:flex;height:16px;border:1px solid #d8d4ca}
 .leaflet-popup-content .pbar span{display:block}
 .leaflet-popup-content .pmeta{color:#6b6860;font-size:12px;margin-top:8px}
@@ -118,9 +118,6 @@ footer{padding:60px 0;color:var(--ink-faint);font-size:13px}
 .leaflet-container a.leaflet-popup-close-button{color:#6b6860}
 .marker-strip{display:flex;width:42px;height:16px;border:1px solid #6b6860;box-shadow:0 1px 4px rgba(0,0,0,.25)}
 .marker-strip span{display:block;height:100%}
-.lightbox{position:fixed;inset:0;z-index:9999;background:rgba(20,19,16,.92);display:flex;align-items:center;justify-content:center;cursor:zoom-out;padding:32px}
-.lightbox img{max-width:95vw;max-height:92vh;width:auto;height:auto;box-shadow:0 10px 50px rgba(0,0,0,.5);background:#efece4}
-.lightbox .lb-close{position:absolute;top:18px;right:24px;font-size:32px;line-height:1;color:#fff;background:none;border:none;cursor:pointer;font-family:var(--sans)}
 </style>
 </head>
 <body>
@@ -610,26 +607,6 @@ submitBtn.addEventListener("click",async()=>{
     ss.textContent="Couldn't save: "+(err.message||"unknown error")+". Your palettes are still downloadable above.";
     submitBtn.disabled=false;
   }
-});
-
-/* ============================================================================
-   Lightbox — click a palette image in any popup to view it full-scale
-============================================================================ */
-function openLightbox(src){
-  if(!src) return;
-  const lb=document.createElement("div");
-  lb.className="lightbox";
-  lb.innerHTML=`<button class="lb-close" aria-label="Close">×</button><img src="${src}" alt="palette, full size">`;
-  const close=()=>{ lb.remove(); document.removeEventListener("keydown",onKey); };
-  const onKey=(e)=>{ if(e.key==="Escape") close(); };
-  lb.addEventListener("click",close);
-  lb.querySelector("img").addEventListener("click",(e)=>e.stopPropagation());
-  document.addEventListener("keydown",onKey);
-  document.body.appendChild(lb);
-}
-document.addEventListener("click",(e)=>{
-  const img=e.target.closest&&e.target.closest("img.pimg");
-  if(img){ e.preventDefault(); openLightbox(img.getAttribute("src")); }
 });
 
 /* ============================================================================
